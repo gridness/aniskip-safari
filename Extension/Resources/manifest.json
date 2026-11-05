@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "aniskip",
+  "description": "Skip openings and endings with AniSkip, and optionally continue to the next Anime365 episode.",
+  "version": "0.1.0",
+  "permissions": ["storage", "nativeMessaging"],
+  "icons": { "48": "icons/icon-48.png", "96": "icons/icon-96.png", "128": "icons/icon-128.png" },
+  "action": { "default_title": "aniskip", "default_popup": "popup.html", "default_icon": "icons/icon-48.png" },
+  "background": { "scripts": ["core.js", "background.js"], "persistent": false },
+  "content_scripts": [
+    {
+      "matches": ["https://*.smotret-anime.co/*", "https://*.smotretanime.co/*", "https://*.smotret-anime.com/*", "https://*.smotret-anime.org/*", "https://*.smotret-anime.app/*"],
+      "js": ["player-bridge.js"], "world": "MAIN", "all_frames": true, "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://*.smotret-anime.co/*", "https://*.smotretanime.co/*", "https://*.smotret-anime.com/*", "https://*.smotret-anime.org/*", "https://*.smotret-anime.app/*"],
+      "js": ["core.js", "content.js"], "all_frames": true, "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [{
+    "resources": ["overlay.css"],
+    "matches": ["https://*.smotret-anime.co/*", "https://*.smotretanime.co/*", "https://*.smotret-anime.com/*", "https://*.smotret-anime.org/*", "https://*.smotret-anime.app/*"]
+  }],
+  "content_security_policy": { "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'" },
+  "browser_specific_settings": { "safari": { "strict_min_version": "27.0" } }
+}

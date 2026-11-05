@@ -1,0 +1,486 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+		3135404208D2AE387D3A4652 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = App/AniSkipSafariApp.swift;
+			sourceTree = SOURCE_ROOT;
+		};
+		332533896BDE39630E5A31C2 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Extension/SafariWebExtensionHandler.swift;
+			sourceTree = SOURCE_ROOT;
+		};
+		D1BA44C6051A6D316C3229EC = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Sources/AniSkipCore/AniSkipClient.swift;
+			sourceTree = SOURCE_ROOT;
+		};
+		B16B6325BA8F1CFBCC279108 = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder.assetcatalog;
+			path = App/Assets.xcassets;
+			sourceTree = SOURCE_ROOT;
+		};
+		24BB2E402161415CD59E05E5 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.json;
+			path = Extension/Resources/manifest.json;
+			sourceTree = SOURCE_ROOT;
+		};
+		602A20E9B4C5A30FAB8C61CD = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.javascript;
+			path = Extension/Resources/core.js;
+			sourceTree = SOURCE_ROOT;
+		};
+		0A7EAA8698B895CC3B300C85 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.javascript;
+			path = Extension/Resources/background.js;
+			sourceTree = SOURCE_ROOT;
+		};
+		29A6602712D7FE81116B2054 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.javascript;
+			path = Extension/Resources/content.js;
+			sourceTree = SOURCE_ROOT;
+		};
+		0704C6FD13725F40A3166479 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.javascript;
+			path = "Extension/Resources/player-bridge.js";
+			sourceTree = SOURCE_ROOT;
+		};
+		D81CB5663DAFC752D935BFC8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = Extension/Resources/popup.html;
+			sourceTree = SOURCE_ROOT;
+		};
+		E728CF221C24231F33140FB3 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.css;
+			path = Extension/Resources/popup.css;
+			sourceTree = SOURCE_ROOT;
+		};
+		5586BEC27EA9A0AEF90F9046 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.javascript;
+			path = Extension/Resources/popup.js;
+			sourceTree = SOURCE_ROOT;
+		};
+		0CE4FC00930CD6AED2C98EE5 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.css;
+			path = Extension/Resources/overlay.css;
+			sourceTree = SOURCE_ROOT;
+		};
+		F99EDE24FCF241135DC66328 = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder;
+			path = Extension/Resources/icons;
+			sourceTree = SOURCE_ROOT;
+		};
+		E22F3D16C14E3CEA667F4ECC = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			path = App/Info.plist;
+			sourceTree = SOURCE_ROOT;
+		};
+		98D510661E9AD573B3337232 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.entitlements;
+			path = App/App.entitlements;
+			sourceTree = SOURCE_ROOT;
+		};
+		3B74199F764E69066C07A42C = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			path = Extension/Info.plist;
+			sourceTree = SOURCE_ROOT;
+		};
+		6F9A66B108666FB0FB107973 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.entitlements;
+			path = Extension/Extension.entitlements;
+			sourceTree = SOURCE_ROOT;
+		};
+		681C948D238C526E9E3424E0 = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.application;
+			path = aniskip.app;
+			sourceTree = BUILT_PRODUCTS_DIR;
+			includeInIndex = 0;
+		};
+		DC176E8AF1DD34CEAAE8410B = {
+			isa = PBXFileReference;
+			explicitFileType = "wrapper.app-extension";
+			path = "aniskip Extension.appex";
+			sourceTree = BUILT_PRODUCTS_DIR;
+			includeInIndex = 0;
+		};
+		EBB30C28FB56077190499346 = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 244210E48437B6556980A702;
+			proxyType = 1;
+			remoteGlobalIDString = A148AD5E0608DCE6158BFF07;
+			remoteInfo = "AniSkipSafari Extension";
+		};
+		965FF32F58B180754D654307 = {
+			isa = PBXTargetDependency;
+			target = A148AD5E0608DCE6158BFF07;
+			targetProxy = EBB30C28FB56077190499346;
+		};
+		2FCDAD1C40F5D8DBFBA9E52D = {
+			isa = PBXBuildFile;
+			fileRef = DC176E8AF1DD34CEAAE8410B;
+			settings = {
+				ATTRIBUTES = (RemoveHeadersOnCopy,);
+			};
+		};
+		C55194DA4D79AF534EBB6458 = {
+			isa = PBXBuildFile;
+			fileRef = 3135404208D2AE387D3A4652;
+		};
+		AFF87A50730392B6633ACECE = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (C55194DA4D79AF534EBB6458,);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7A4C2DC8FCA657188648E999 = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B64270C93E9849FFC92EB06B = {
+			isa = PBXBuildFile;
+			fileRef = B16B6325BA8F1CFBCC279108;
+		};
+		F9187E824FE171A6F0EFAE28 = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (B64270C93E9849FFC92EB06B,);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AFC32963E7959E7A34264826 = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (2FCDAD1C40F5D8DBFBA9E52D,);
+			runOnlyForDeploymentPostprocessing = 0;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			name = "Embed App Extensions";
+		};
+		3D970E9AC0F028A51CBDD801 = {
+			isa = PBXBuildFile;
+			fileRef = 332533896BDE39630E5A31C2;
+		};
+		49EEC38F2A087F264732B049 = {
+			isa = PBXBuildFile;
+			fileRef = D1BA44C6051A6D316C3229EC;
+		};
+		3D11A07DA6B3E52118501F80 = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (3D970E9AC0F028A51CBDD801, 49EEC38F2A087F264732B049,);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E4736F9450E9ACD04A4FE5C5 = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DADCD5E778E578B1020884B1 = {
+			isa = PBXBuildFile;
+			fileRef = 24BB2E402161415CD59E05E5;
+		};
+		4423540236B5A6D682B8CF3D = {
+			isa = PBXBuildFile;
+			fileRef = 602A20E9B4C5A30FAB8C61CD;
+		};
+		1FBA5EB16F0F9A016360EEA4 = {
+			isa = PBXBuildFile;
+			fileRef = 0A7EAA8698B895CC3B300C85;
+		};
+		6D612CE224E47AF9F0E3D20E = {
+			isa = PBXBuildFile;
+			fileRef = 29A6602712D7FE81116B2054;
+		};
+		8F9547DAF9DC110E8F2C81AF = {
+			isa = PBXBuildFile;
+			fileRef = 0704C6FD13725F40A3166479;
+		};
+		FA7037BAAA7E0B31A407FE0A = {
+			isa = PBXBuildFile;
+			fileRef = D81CB5663DAFC752D935BFC8;
+		};
+		41A459BF20CB487592744123 = {
+			isa = PBXBuildFile;
+			fileRef = E728CF221C24231F33140FB3;
+		};
+		B9CC302B04E1462DF67B58D7 = {
+			isa = PBXBuildFile;
+			fileRef = 5586BEC27EA9A0AEF90F9046;
+		};
+		9584BCE5ADA7915B15F29929 = {
+			isa = PBXBuildFile;
+			fileRef = 0CE4FC00930CD6AED2C98EE5;
+		};
+		B04D554F2CEFB71318C595BB = {
+			isa = PBXBuildFile;
+			fileRef = F99EDE24FCF241135DC66328;
+		};
+		25A07E1F1115727AB811801A = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (DADCD5E778E578B1020884B1, 4423540236B5A6D682B8CF3D, 1FBA5EB16F0F9A016360EEA4, 6D612CE224E47AF9F0E3D20E, 8F9547DAF9DC110E8F2C81AF, FA7037BAAA7E0B31A407FE0A, 41A459BF20CB487592744123, B9CC302B04E1462DF67B58D7, 9584BCE5ADA7915B15F29929, B04D554F2CEFB71318C595BB,);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0D9B6C467828201280D620A8 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = macosx;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MARKETING_VERSION = 0.1.0;
+				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gridness.AniSkipSafari;
+				PRODUCT_NAME = aniskip;
+				INFOPLIST_FILE = App/Info.plist;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks",);
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				ENABLE_TESTABILITY = YES;
+			};
+			name = Debug;
+		};
+		E532E4CDC1E6865CE523475E = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = macosx;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MARKETING_VERSION = 0.1.0;
+				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gridness.AniSkipSafari;
+				PRODUCT_NAME = aniskip;
+				INFOPLIST_FILE = App/Info.plist;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks",);
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+			};
+			name = Release;
+		};
+		7FA7C6DD60DC323C7F3FA76C = {
+			isa = XCConfigurationList;
+			buildConfigurations = (0D9B6C467828201280D620A8, E532E4CDC1E6865CE523475E,);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C1E9827DB735CA9BAA54A540 = {
+			isa = PBXNativeTarget;
+			name = AniSkipSafari;
+			productName = aniskip;
+			productReference = 681C948D238C526E9E3424E0;
+			productType = "com.apple.product-type.application";
+			buildConfigurationList = 7FA7C6DD60DC323C7F3FA76C;
+			buildPhases = (AFF87A50730392B6633ACECE, 7A4C2DC8FCA657188648E999, F9187E824FE171A6F0EFAE28, AFC32963E7959E7A34264826,);
+			buildRules = ();
+			dependencies = (965FF32F58B180754D654307,);
+		};
+		074A85165A7F62B4C52B1785 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = macosx;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MARKETING_VERSION = 0.1.0;
+				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gridness.AniSkipSafari.Extension;
+				PRODUCT_NAME = "aniskip Extension";
+				INFOPLIST_FILE = Extension/Info.plist;
+				CODE_SIGN_ENTITLEMENTS = Extension/Extension.entitlements;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/../../../../Frameworks",);
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				ENABLE_TESTABILITY = YES;
+			};
+			name = Debug;
+		};
+		9C2835E2E47A076E76BBE89C = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = macosx;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MARKETING_VERSION = 0.1.0;
+				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gridness.AniSkipSafari.Extension;
+				PRODUCT_NAME = "aniskip Extension";
+				INFOPLIST_FILE = Extension/Info.plist;
+				CODE_SIGN_ENTITLEMENTS = Extension/Extension.entitlements;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/../../../../Frameworks",);
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+			};
+			name = Release;
+		};
+		B0F7F2C54C54E9D2422D30E5 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (074A85165A7F62B4C52B1785, 9C2835E2E47A076E76BBE89C,);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A148AD5E0608DCE6158BFF07 = {
+			isa = PBXNativeTarget;
+			name = "AniSkipSafari Extension";
+			productName = "aniskip Extension";
+			productReference = DC176E8AF1DD34CEAAE8410B;
+			productType = "com.apple.product-type.app-extension";
+			buildConfigurationList = B0F7F2C54C54E9D2422D30E5;
+			buildPhases = (3D11A07DA6B3E52118501F80, E4736F9450E9ACD04A4FE5C5, 25A07E1F1115727AB811801A,);
+			buildRules = ();
+			dependencies = ();
+		};
+		FC233BDA2344D97687F5A251 = {
+			isa = PBXGroup;
+			name = App;
+			sourceTree = "<group>";
+			children = (3135404208D2AE387D3A4652, B16B6325BA8F1CFBCC279108, E22F3D16C14E3CEA667F4ECC, 98D510661E9AD573B3337232,);
+		};
+		77337C826548AE80E23FA4E2 = {
+			isa = PBXGroup;
+			name = Extension;
+			sourceTree = "<group>";
+			children = (332533896BDE39630E5A31C2, D1BA44C6051A6D316C3229EC, 3B74199F764E69066C07A42C, 6F9A66B108666FB0FB107973, 24BB2E402161415CD59E05E5, 602A20E9B4C5A30FAB8C61CD, 0A7EAA8698B895CC3B300C85, 29A6602712D7FE81116B2054, 0704C6FD13725F40A3166479, D81CB5663DAFC752D935BFC8, E728CF221C24231F33140FB3, 5586BEC27EA9A0AEF90F9046, 0CE4FC00930CD6AED2C98EE5, F99EDE24FCF241135DC66328,);
+		};
+		B9E7F2871A3402983868AFC8 = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+			children = (681C948D238C526E9E3424E0, DC176E8AF1DD34CEAAE8410B,);
+		};
+		19F479106CE8C3BA8C106518 = {
+			isa = PBXGroup;
+			sourceTree = "<group>";
+			children = (FC233BDA2344D97687F5A251, 77337C826548AE80E23FA4E2, B9E7F2871A3402983868AFC8,);
+		};
+		184B519F8E1416CCE38CFFD7 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = macosx;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MARKETING_VERSION = 0.1.0;
+				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				ENABLE_TESTABILITY = YES;
+			};
+			name = Debug;
+		};
+		A824290273A346217D9BE6F4 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = macosx;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MARKETING_VERSION = 0.1.0;
+				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+			};
+			name = Release;
+		};
+		1922B098E983995960BE56B0 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (184B519F8E1416CCE38CFFD7, A824290273A346217D9BE6F4,);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		244210E48437B6556980A702 = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					C1E9827DB735CA9BAA54A540 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					A148AD5E0608DCE6158BFF07 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+				};
+			};
+			buildConfigurationList = 1922B098E983995960BE56B0;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base,);
+			mainGroup = 19F479106CE8C3BA8C106518;
+			productRefGroup = B9E7F2871A3402983868AFC8;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (C1E9827DB735CA9BAA54A540, A148AD5E0608DCE6158BFF07,);
+		};
+	};
+	rootObject = 244210E48437B6556980A702;
+}
