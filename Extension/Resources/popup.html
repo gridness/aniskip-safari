@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>aniskip</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+  <header><img src="icons/anime365-logo.png" width="120" height="35" alt="Anime365"><h1>aniskip</h1></header>
+  <main>
+    <p id="context" role="status">Connecting…</p>
+    <label class="setting master"><strong>Enabled</strong><input type="checkbox" id="enabled" role="switch"></label>
+    <label class="setting"><strong>Skip openings</strong><input type="checkbox" id="autoSkipOpening" role="switch"></label>
+    <label class="setting"><strong>Skip endings</strong><input type="checkbox" id="autoSkipEnding" role="switch"></label>
+    <label class="setting"><strong>Autoplay next episode</strong><input type="checkbox" id="autoplay" role="switch"></label>
+    <p id="error" role="alert" hidden></p>
+  </main>
+  <script src="core.js"></script><script src="popup.js"></script>
+</body></html>
