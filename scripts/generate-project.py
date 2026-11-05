@@ -3,10 +3,17 @@
 from pathlib import Path
 import hashlib
 import json
+import os
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
 objects = {}
+version = (ROOT / "VERSION").read_text().strip()
+build_number = os.environ.get("ANISKIP_BUILD_NUMBER", "1")
+if not re.fullmatch(r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)", version):
+    raise ValueError("VERSION must contain a three-part release version.")
+if not re.fullmatch(r"[1-9]\d*", build_number):
+    raise ValueError("ANISKIP_BUILD_NUMBER must be a positive integer.")
 
 
 def uid(name):
@@ -46,7 +53,7 @@ ext_ent = file("Extension/Extension.entitlements", "text.plist.entitlements")
 app_product = obj("app-product", "PBXFileReference", explicitFileType="wrapper.application", path="aniskip.app", sourceTree="BUILT_PRODUCTS_DIR", includeInIndex=0)
 ext_product = obj("ext-product", "PBXFileReference", explicitFileType="wrapper.app-extension", path="aniskip Extension.appex", sourceTree="BUILT_PRODUCTS_DIR", includeInIndex=0)
 
-common = dict(MACOSX_DEPLOYMENT_TARGET="27.0", SWIFT_VERSION="5.0", SDKROOT="macosx", CLANG_ENABLE_MODULES="YES", CLANG_ENABLE_OBJC_ARC="YES", ENABLE_HARDENED_RUNTIME="YES", MARKETING_VERSION="0.1.0", CURRENT_PROJECT_VERSION="1", CODE_SIGN_STYLE="Automatic", GENERATE_INFOPLIST_FILE="NO", COMBINE_HIDPI_IMAGES="YES")
+common = dict(MACOSX_DEPLOYMENT_TARGET="27.0", SWIFT_VERSION="5.0", SDKROOT="macosx", CLANG_ENABLE_MODULES="YES", CLANG_ENABLE_OBJC_ARC="YES", ENABLE_HARDENED_RUNTIME="YES", MARKETING_VERSION=version, CURRENT_PROJECT_VERSION=build_number, CODE_SIGN_STYLE="Automatic", GENERATE_INFOPLIST_FILE="NO", COMBINE_HIDPI_IMAGES="YES")
 
 
 def configurations(label, settings):

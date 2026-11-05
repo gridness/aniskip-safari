@@ -4,6 +4,13 @@ const path = require("node:path");
 const vm = require("node:vm");
 const root = path.resolve(__dirname, "../Extension/Resources");
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "manifest.json")));
+const repository = path.resolve(__dirname, "..");
+const version = fs.readFileSync(path.join(repository, "VERSION"), "utf8").trim();
+assert.equal(manifest.version, version);
+assert.equal(JSON.parse(fs.readFileSync(path.join(repository, "package.json"))).version, version);
+const lock = JSON.parse(fs.readFileSync(path.join(repository, "package-lock.json")));
+assert.equal(lock.version, version);
+assert.equal(lock.packages[""].version, version);
 assert.equal(manifest.manifest_version, 3);
 assert.deepEqual(manifest.permissions, ["storage", "nativeMessaging"]);
 for (const group of manifest.content_scripts) {

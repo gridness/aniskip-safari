@@ -1,18 +1,60 @@
-name: Extension tests
+name: Tests and native build
 on:
   push:
   pull_request:
+  workflow_call:
+    inputs:
+      release_version:
+        type: string
+        required: false
+        default: ''
 permissions:
   contents: read
 jobs:
   extension:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
+      - name: Apply release version
+        if: inputs.release_version != ''
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: python3 scripts/release.py stamp --version "$RELEASE_VERSION" --build-number "$GITHUB_RUN_NUMBER"
       - run: npm ci --ignore-scripts
       - run: npm run check
       - run: npm test
+      - run: python3 -m unittest discover -s Tests/Release -v
+  native:
+    runs-on: ${{ vars.MACOS_RUNNER || 'xcode-27' }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/check-macos.sh
+      - name: Apply release version
+        if: inputs.release_version != ''
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: python3 scripts/release.py stamp --version "$RELEASE_VERSION" --build-number "$GITHUB_RUN_NUMBER"
+      - name: Test Swift API client
+        run: swift test
+      - name: Archive universal app and embedded Safari extension
+        run: |
+          xcodebuild -project AniSkipSafari.xcodeproj -scheme AniSkipSafari \
+            -configuration Release -destination 'generic/platform=macOS' \
+            -archivePath build/aniskip.xcarchive -derivedDataPath build/DerivedData \
+            ARCHS='arm64 x86_64' ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO archive
+      - name: Preserve archive permissions and symlinks
+        if: inputs.release_version != ''
+        run: ditto -c -k --sequesterRsrc --keepParent build/aniskip.xcarchive build/aniskip-archive.zip
+      - uses: actions/upload-artifact@v4
+        if: inputs.release_version != ''
+        with:
+          name: unsigned-release-archive
+          path: build/aniskip-archive.zip
+          if-no-files-found: error
+          retention-days: 3

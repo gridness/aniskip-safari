@@ -1,0 +1,149 @@
+name: Release
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A failed run can be retried; a later main push must not cancel an in-flight release.
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      previous_tag: ${{ steps.version.outputs.previous_tag }}
+      published: ${{ steps.existing.outputs.published }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Plan semantic version from release tags and commits
+        id: version
+        run: python3 scripts/release.py plan --ref "$GITHUB_SHA" --github-output "$GITHUB_OUTPUT"
+      - name: Skip an already published commit
+        id: existing
+        uses: actions/github-script@v7
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        with:
+          script: |
+            try {
+              const { data } = await github.rest.repos.getReleaseByTag({
+                ...context.repo, tag: process.env.RELEASE_TAG
+              });
+              core.setOutput('published', String(!data.draft));
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              core.setOutput('published', 'false');
+            }
+
+  checks:
+    needs: prepare
+    if: needs.prepare.outputs.published != 'true'
+    uses: ./.github/workflows/test.yml
+    with:
+      release_version: ${{ needs.prepare.outputs.version }}
+
+  package:
+    needs: [prepare, checks]
+    runs-on: ${{ vars.MACOS_RUNNER || 'xcode-27' }}
+    timeout-minutes: 45
+    outputs:
+      signing: ${{ steps.package.outputs.signing }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/check-macos.sh
+      - name: Apply release version
+        env:
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: python3 scripts/release.py stamp --version "$RELEASE_VERSION" --build-number "$GITHUB_RUN_NUMBER"
+      - uses: actions/download-artifact@v4
+        with:
+          name: unsigned-release-archive
+          path: build
+      - name: Restore tested archive
+        run: ditto -x -k build/aniskip-archive.zip build
+      - name: Sign, optionally notarize, and package
+        id: package
+        env:
+          MACOS_CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          APPLE_API_KEY_BASE64: ${{ secrets.APPLE_API_KEY_BASE64 }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+        run: bash scripts/package-release.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: [prepare, package]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+      PREVIOUS_TAG: ${{ needs.prepare.outputs.previous_tag }}
+      SIGNING: ${{ needs.package.outputs.signing }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: dist
+      - name: Verify downloaded release assets
+        run: (cd dist && sha256sum --check SHA256SUMS)
+      - name: Tag the exact tested main commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git rev-parse --verify --quiet "refs/tags/$RELEASE_TAG" >/dev/null; then
+            test "$(git rev-parse "$RELEASE_TAG^{commit}")" = "$GITHUB_SHA"
+          else
+            git tag -a "$RELEASE_TAG" "$GITHUB_SHA" -m "aniskip $RELEASE_TAG"
+            git push origin "refs/tags/$RELEASE_TAG"
+          fi
+      - name: Prepare draft release and generated notes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = process.env.RELEASE_TAG;
+            const parameters = { ...context.repo, tag_name: tag, target_commitish: context.sha };
+            if (process.env.PREVIOUS_TAG) parameters.previous_tag_name = process.env.PREVIOUS_TAG;
+            const { data: notes } = await github.rest.repos.generateReleaseNotes(parameters);
+            const signing = process.env.SIGNING === 'notarized'
+              ? 'Developer ID signed, notarized by Apple, and stapled.'
+              : '**Development build:** ad-hoc signed and not notarized. Enable Safari’s Develop → Allow Unsigned Extensions to load the extension. Normal Gatekeeper distribution requires the Apple signing secrets described in the README.';
+            const body = `${notes.body}\n\n## Downloads\nUniversal app for Apple silicon and Intel Macs, macOS 27+ and Safari 27+. The app ZIP includes the companion app and embedded extension. SHA256SUMS verifies the downloads; dSYMs are included when available.\n\n## Signing\n${signing}`;
+            let release;
+            try {
+              ({ data: release } = await github.rest.repos.getReleaseByTag({ ...context.repo, tag }));
+              if (!release.draft) throw new Error('Release already published; refusing to replace its assets.');
+              await github.rest.repos.updateRelease({ ...context.repo, release_id: release.id, body });
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              await github.rest.repos.createRelease({
+                ...context.repo, tag_name: tag, target_commitish: context.sha,
+                name: `aniskip ${tag}`, body, draft: true, prerelease: false
+              });
+            }
+      - name: Upload completed artifacts to the draft
+        run: gh release upload "$RELEASE_TAG" dist/*.zip dist/SHA256SUMS --clobber
+      - name: Publish complete release
+        run: gh release edit "$RELEASE_TAG" --draft=false --latest

@@ -14,7 +14,7 @@ Requires macOS 27+, Xcode with the macOS 27 SDK (Xcode 27+), and Safari 27+. The
 4. Build and run. Select **Open Safari Extension Settings** in the companion app, enable **aniskip**, and allow access to the supported websites. Reload existing episode tabs.
 5. Open an episode and use the **aniskip** toolbar popup to choose playback options.
 
-For local unsigned development, Safari’s **Develop → Allow Unsigned Extensions** may be required. Enable developer features under Safari → Settings → Advanced if the Develop menu is hidden. A developer-signed build is recommended. Distribution requires signing/notarization or App Store submission; no development identity is committed here.
+For local unsigned development, Safari’s **Develop → Allow Unsigned Extensions** may be required. Enable developer features under Safari → Settings → Advanced if the Develop menu is hidden. A developer-signed build is recommended. No development identity is committed here.
 
 Compile without signing for a packaging check on a Mac with the required SDK:
 
@@ -65,7 +65,46 @@ On macOS 27+ with Xcode, test the Swift client with deterministic URLProtocol fi
 swift test
 ```
 
-Before distributing, also test a signed app in Safari: mirror permissions, real episodes with known timings, manual/automatic skips, post-credit scenes, cancelled/completed countdowns, translation selection, and autoplay allowed/denied. The cloud machine is Linux: **native compilation, Swift tests, signing, and live Safari playback have not been verified there**.
+Release planning and version stamping tests:
+
+```sh
+python3 -m unittest discover -s Tests/Release -v
+```
+
+Before distributing, also test a signed app in Safari: mirror permissions, real episodes with known timings, manual/automatic skips, post-credit scenes, cancelled/completed countdowns, translation selection, and autoplay allowed/denied. The cloud machine is Linux; native compilation and Swift tests run on macOS through GitHub Actions. Live Safari playback still requires manual validation.
+
+## Automatic releases
+
+Every push to **main**, including PR merges, runs `.github/workflows/release.yml`. It can also be rerun manually from Actions on main after a failed attempt. There is no release PR or manual version bump required.
+
+1. Determine the next version from reachable `vMAJOR.MINOR.PATCH` tags. The first release uses `VERSION` (currently `0.1.0`). Later releases increment major for `type!:` or a `BREAKING CHANGE:` footer, minor for `feat:` / `feat(scope):`, and patch for other changes. Use these prefixes in squash-merge PR titles or commit messages.
+2. Inject that version into both native bundles, the extension manifest, and npm metadata in the build checkout. The Actions run number supplies `CFBundleVersion`. Tags are the release version history; generated build changes are not pushed to main.
+3. Run the browser, release-helper, and Swift tests. Build a universal **arm64 + x86_64** Release archive containing the app and extension on GitHub’s [`xcode-27` runner](https://github.com/actions/runner-images/issues/14404), which includes macOS 27 and its SDK. A `MACOS_RUNNER` repository variable can select another compatible runner. Both host and SDK are checked before building. PRs and branch pushes also run these native checks.
+4. Sign and package the tested archive. Only after all checks and packaging pass, tag the exact main commit and create a draft GitHub Release with GitHub-generated notes since the previous release. Upload the app ZIP, dSYM ZIP when available, and `SHA256SUMS`, then publish the complete release.
+
+Release runs are serialized. Retrying the same commit reuses its tag, can complete a draft interrupted during upload, and skips an already published release. Existing tags are never force-moved. If repository rules restrict tag creation, allow the Actions token to create the `v*` release tags. Only the publish job requests `contents: write`; no PAT is required.
+
+Without Apple signing credentials, the release contains an **ad-hoc signed development build**, explicitly labeled as not notarized in its notes. It requires developer installation and Safari’s **Allow Unsigned Extensions**; it is not a Gatekeeper-ready distribution.
+
+For Developer ID signed and notarized releases, add **all five** repository Actions secrets under Settings → Secrets and variables → Actions:
+
+| Secret | Value |
+| --- | --- |
+| `MACOS_CERTIFICATE_BASE64` | Base64 of a `.p12` containing exactly one Developer ID Application certificate and its private key |
+| `MACOS_CERTIFICATE_PASSWORD` | The `.p12` export password |
+| `APPLE_API_KEY_BASE64` | Base64 of the App Store Connect API private `.p8` key used for notarization |
+| `APPLE_API_KEY_ID` | That API key’s ID |
+| `APPLE_API_ISSUER_ID` | Its issuer ID |
+
+The workflow imports the certificate into a temporary keychain, signs the app and extension with the hardened runtime, submits to Apple, waits for acceptance, and staples the ticket before creating the final ZIP. Incomplete credentials, failed signing, or rejected notarization fail the run before publication. Temporary keychain and key files are removed even on failure. Credentials belong in GitHub secrets, never source files.
+
+To reproduce a tagged build locally, stamp its tag version before building:
+
+```sh
+python3 scripts/release.py stamp --version 0.1.0 --build-number 1
+```
+
+This changes the current checkout’s version files and regenerates the project; CI does this in its disposable checkout. Regular development uses the checked-in base version.
 
 The checked-in Xcode project needs no generator to build. To regenerate the project or refresh the bundled Anime365 assets, run `python3 scripts/generate-project.py` and `python3 scripts/generate-artwork.py` (asset resizing requires Pillow). The project generator replaces the project and scheme; preserve intentional Xcode configuration changes in the generator too. Original logo sources and the green accent are recorded in [Branding/README.md](Branding/README.md).
 
