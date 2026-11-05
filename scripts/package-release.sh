@@ -15,8 +15,8 @@ for bundle in sys.argv[2:]:
     assert info["CFBundleShortVersionString"] == sys.argv[1], "Bundle release version mismatch"
     assert info["LSMinimumSystemVersion"] == "27.0", "Unexpected minimum macOS version"
 PY
-lipo -verify_arch arm64 x86_64 "$app/Contents/MacOS/aniskip"
-lipo -verify_arch arm64 x86_64 "$extension/Contents/MacOS/aniskip Extension"
+lipo "$app/Contents/MacOS/aniskip" -verify_arch arm64 x86_64
+lipo "$extension/Contents/MacOS/aniskip Extension" -verify_arch arm64 x86_64
 
 secret_names=(MACOS_CERTIFICATE_BASE64 MACOS_CERTIFICATE_PASSWORD APPLE_API_KEY_BASE64 APPLE_API_KEY_ID APPLE_API_ISSUER_ID)
 configured=0

@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: '24'
           cache: npm
@@ -33,7 +33,7 @@ jobs:
     runs-on: ${{ vars.MACOS_RUNNER || 'xcode-27' }}
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       - run: bash scripts/check-macos.sh
       - name: Apply release version
         if: inputs.release_version != ''
@@ -51,7 +51,7 @@ jobs:
       - name: Preserve archive permissions and symlinks
         if: inputs.release_version != ''
         run: ditto -c -k --sequesterRsrc --keepParent build/aniskip.xcarchive build/aniskip-archive.zip
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.2
         if: inputs.release_version != ''
         with:
           name: unsigned-release-archive
@@ -61,7 +61,7 @@ jobs:
       - name: Verify development signing and packaging
         if: inputs.release_version == ''
         run: bash scripts/package-release.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.2
         if: inputs.release_version == ''
         with:
           name: aniskip-development-macos
