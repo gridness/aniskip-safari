@@ -34,7 +34,7 @@ The output is `build/Build/Products/Debug/aniskip.app`. Use Xcode signing for no
 - **Autoplay:** off by default. After the full video ends, a cancellable five-second countdown opens the next released episode of the same series and episode type. It prefers the same translation language/kind and provider, keeps the current mirror, and stops at the last available episode.
 - **Starting the next video:** the extension requests playback on the new page. Safari may require **Settings for This Website → Auto-Play → Allow All Auto-Play**. If Safari denies playback, a **Play episode** button provides a user gesture. Anime365’s login, player activation, availability, and advertising requirements still apply.
 
-Missing timings leave normal playback available. Substantially different release lengths are rejected rather than stretching timestamps. Missing MyAnimeList mappings, attached specials with different numbering, and split-season/absolute-numbering mismatches may have no supported timings. No title guessing or season-number remapping is performed.
+Missing timings leave normal playback available, and the notice hides after five seconds. Substantially different release lengths are rejected rather than stretching timestamps. Missing MyAnimeList mappings, attached specials with different numbering, and split-season/absolute-numbering mismatches may have no supported timings. No title guessing or season-number remapping is performed.
 
 ## Implementation and privacy
 

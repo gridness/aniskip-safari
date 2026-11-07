@@ -25,7 +25,8 @@ async function contentHarness(t, settings = {}, fixture = {}) {
   w.clearInterval = ref => { if (ref) ref.active = false; };
   w.postMessage = data => {
     commands.push(data);
-    w.dispatchEvent(new w.MessageEvent("message", { data, source: w, origin: w.location.origin }));
+    const dispatch = () => w.dispatchEvent(new w.MessageEvent("message", { data, source: w, origin: w.location.origin }));
+    if (fixture.asyncMessages) setImmediate(dispatch); else dispatch();
   };
   w.fetch = async url => {
     const path = new URL(url).pathname;
@@ -106,6 +107,78 @@ test("missing timings and network errors keep the video usable", async t => {
   assert.match(h.shadow().textContent, /AniSkip is unavailable/);
   assert.equal([...h.shadow().querySelectorAll("button")].find(b => b.textContent === "Retry").hidden, false);
 });
+test("missing timings notice disappears after five seconds and stays hidden on player updates", async t => {
+  const h = await contentHarness(t, {}, { response: { found: false, results: [] } });
+  h.emit(); await flush();
+  const status = h.shadow().querySelector('[role="status"]');
+  assert.equal(status.hidden, false);
+  assert.match(status.textContent, /No timings/);
+  h.tick(4999);
+  assert.equal(status.hidden, false);
+  h.tick(2); h.emit(); await flush();
+  assert.equal(status.hidden, true);
+  assert.equal(h.shadow().querySelector("section").hidden, true);
+  h.tick(10000); h.emit(); await flush();
+  assert.equal(status.hidden, true);
+  h.emit({ duration: 1500 }); await flush();
+  assert.equal(status.hidden, false);
+  h.tick(5001); await flush();
+  assert.equal(status.hidden, true);
+});
+async function endedPlayerHarness(t, fixture = {}) {
+  const h = await contentHarness(t, { autoplay: true }, fixture);
+  const events = {};
+  let logicalTime = 1400, paused = false;
+  const p = { concatenate: { summaryDuration: 1440 },
+    currentTime(value) { if (value !== undefined) logicalTime = value; return logicalTime; },
+    duration: () => 1440, paused: () => paused, seeking: () => false,
+    pause() { paused = true; }, play() { paused = false; },
+    on(name, fn) { events[name] = fn; }, off(name) { delete events[name]; } };
+  h.w.videojs = { players: { "main-video": p } };
+  h.w.eval(source("player-bridge.js")); await flush();
+  // Anime365 checks/switches the source before emitting the full-episode event.
+  h.finish = async (drain = true) => { logicalTime = 0; events["public-ended"](); if (drain) await flush(); };
+  h.resume = () => { paused = false; };
+  h.paused = () => paused;
+  return h;
+}
+test("autoplay advances when Anime365 rewinds before public-ended", async t => {
+  const h = await endedPlayerHarness(t);
+  await h.finish();
+  const cancel = [...h.shadow().querySelectorAll("button")].find(b => b.textContent === "Cancel autoplay");
+  assert.equal(cancel.hidden, false);
+  assert.equal(h.paused(), true);
+  // A pending source switch may try to start the old episode again.
+  h.resume(); h.tick(1000); await flush();
+  assert.equal(h.paused(), true);
+  assert.equal(cancel.hidden, false);
+  h.tick(4001); await flush();
+  const navigation = h.runtimeMessages.filter(m => m.type === "openEpisode");
+  assert.equal(navigation.length, 1);
+  assert.equal(navigation[0].episodeID, 388805);
+});
+test("queued player samples cannot erase completion before the countdown pauses playback", async t => {
+  const h = await endedPlayerHarness(t, { asyncMessages: true });
+  await h.finish(false);
+  h.tick(250); await flush();
+  const cancel = [...h.shadow().querySelectorAll("button")].find(b => b.textContent === "Cancel autoplay");
+  assert.equal(cancel.hidden, false);
+  assert.equal(h.paused(), true);
+  h.tick(5001); await flush();
+  assert.equal(h.runtimeMessages.filter(m => m.type === "openEpisode").length, 1);
+});
+for (const action of ["cancel", "disable", "seek"]) {
+  test(`${action} releases the completed player and cancels autoplay`, async t => {
+    const h = await endedPlayerHarness(t);
+    await h.finish();
+    if (action === "cancel") [...h.shadow().querySelectorAll("button")].find(b => b.textContent === "Cancel autoplay").click();
+    else if (action === "disable") h.changeSettings({ autoplay: false });
+    else h.w.postMessage({ channel: "aniskip-safari-player-v1", source: "extension", command: "seek", seconds: 100, key: "1" });
+    h.resume(); h.tick(6000); await flush();
+    assert.equal(h.paused(), false);
+    assert.equal(h.runtimeMessages.some(m => m.type === "openEpisode"), false);
+  });
+}
 test("next-page playback intent requests play, and rejection offers a user gesture", async t => {
   const h = await contentHarness(t, { autoplay: true }, { autoplayIntent: true });
   h.emit(); await flush();

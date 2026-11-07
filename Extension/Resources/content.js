@@ -5,8 +5,13 @@
   let snapshot = null, rawTimes = [], requestKey = "", epoch = 0, pageKey = "", timingError = false;
   let host, ui, countdown = null, countdownCancelled = false, navigationPending = false;
   let autoplayAttempted = false, playBlocked = false;
+  let timingStatusDeadline = 0;
   const autoSkipped = new Set();
   const command = (name, extra = {}) => window.postMessage({ channel, source: "extension", command: name, key: snapshot?.key, ...extra }, location.origin);
+  function setTimingStatus(message, temporary = false) {
+    timingStatus = message;
+    timingStatusDeadline = temporary ? Date.now() + 5000 : 0;
+  }
   async function api(path) {
     const response = await fetch(new URL(path, location.origin), { credentials: "same-origin", signal: AbortSignal.timeout(12000) });
     if (!response.ok) throw new Error(`Anime365 metadata is unavailable (${response.status}).`);
@@ -27,6 +32,8 @@
   async function loadContext(route) {
     const version = ++epoch;
     context = null; metadataError = ""; rawTimes = []; requestKey = ""; timingError = false;
+    setTimingStatus("");
+    if (countdown) command("releaseEnd");
     stopCountdown(); countdownCancelled = false; navigationPending = false; autoplayAttempted = false; autoSkipped.clear();
     if (!route) { render(); return; }
     try {
@@ -47,7 +54,7 @@
       context = { episode, series, translation, next: A.nextEpisode(series.episodes, episode),
         // A special attached to a TV season does not use that season's regular MAL episode numbering.
         malID: episode.episodeType === series.type && A.positiveID(series.myAnimeListId) ? Number(series.myAnimeListId) : null };
-      timingStatus = context.malID ? "Waiting for video…" : "No matching MyAnimeList episode.";
+      setTimingStatus(context.malID ? "Waiting for video…" : "No matching MyAnimeList episode.", !context.malID);
       await updateTimes();
       await tryAutoplay();
     } catch (error) { if (version === epoch) metadataError = error.message; }
@@ -57,16 +64,16 @@
     if (!preferences.enabled || !context?.malID || !snapshot?.ready) return;
     const key = `${epoch}:${context.malID}:${context.episode.episodeInt}:${Math.round(snapshot.duration)}`;
     if (requestKey === key) return;
-    requestKey = key; rawTimes = []; timingError = false; timingStatus = "Loading timings…";
+    requestKey = key; rawTimes = []; timingError = false; setTimingStatus("Loading timings…");
     try {
       const response = await browser.runtime.sendMessage({ type: "skipTimes", malID: context.malID,
         episode: Number(context.episode.episodeInt), duration: snapshot.duration });
       if (requestKey !== key) return;
       if (!response || response.error) throw new Error(response?.error || "The Safari extension did not respond.");
       rawTimes = response.results || [];
-      timingStatus = A.intervals(rawTimes, snapshot.duration).length ? "" : "No timings for this release.";
+      setTimingStatus(A.intervals(rawTimes, snapshot.duration).length ? "" : "No timings for this release.", true);
     } catch (error) {
-      if (requestKey === key) { timingStatus = error.message; timingError = true; }
+      if (requestKey === key) { setTimingStatus(error.message); timingError = true; }
     }
     render();
   }
@@ -81,6 +88,7 @@
       if (Date.now() >= countdown.deadline) { stopCountdown(); void navigateNext(); }
       render();
     }, 200);
+    command("holdEnd");
     render();
   }
   async function performNavigation(episodeID, seriesID) {
@@ -108,7 +116,7 @@
       const result = window === window.top ? await performNavigation(message.episodeID, message.seriesID) : await browser.runtime.sendMessage(message);
       if (result?.error || !result?.ok) throw new Error(result?.error || "Could not open the next episode.");
     } catch (error) {
-      timingStatus = error.message; navigationPending = false; countdownCancelled = true; render();
+      setTimingStatus(error.message); navigationPending = false; countdownCancelled = true; command("releaseEnd"); render();
     }
   }
   async function tryAutoplay() {
@@ -138,7 +146,7 @@
     skip.onclick = () => { const active = activeNow(); if (active) command("seek", { seconds: active.end }); };
     retry.onclick = () => { requestKey = ""; metadataError = ""; void loadContext(currentRoute()); };
     play.onclick = () => { playBlocked = false; command("play"); render(); };
-    cancel.onclick = () => { countdownCancelled = true; stopCountdown(); render(); };
+    cancel.onclick = () => { countdownCancelled = true; stopCountdown(); command("releaseEnd"); render(); };
     shadow.append(panel); parent.append(host);
     // Anime365's .video-js container is already positioned; this also supports plain HTML players.
     if (getComputedStyle(parent).position === "static") parent.style.position = "relative";
@@ -157,7 +165,8 @@
     ui.play.hidden = !playBlocked;
     ui.retry.hidden = !metadataError && !timingError;
     const label = countdown ? `Next episode in ${Math.max(1, Math.ceil((countdown.deadline - Date.now()) / 1000))}…` :
-      playBlocked ? "Safari blocked autoplay." : metadataError || timingStatus;
+      playBlocked ? "Safari blocked autoplay." : metadataError ||
+        (timingStatusDeadline && Date.now() >= timingStatusDeadline ? "" : timingStatus);
     if (ui.status.textContent !== label) ui.status.textContent = label;
     ui.status.hidden = !label;
     ui.panel.hidden = !active && !label && !playBlocked;
@@ -167,14 +176,17 @@
     if (event.source !== window || event.origin !== location.origin || m?.channel !== channel || m.source !== "player") return;
     if (m.type === "playbackError") {
       if (m.command === "play") playBlocked = true;
-      else { timingStatus = "Could not seek this video."; timingError = true; }
+      else { setTimingStatus("Could not control this video."); timingError = true; }
       render(); return;
     }
     if (m.type !== "state" || typeof m.key !== "string" || !Number.isFinite(m.currentTime) || !Number.isFinite(m.duration)) return;
     if (snapshot?.key !== m.key) { autoSkipped.clear(); autoplayAttempted = false; playBlocked = false; }
     snapshot = m;
     if (!m.ended && countdown) { stopCountdown(); countdownCancelled = true; }
-    if (m.ended) beginCountdown();
+    if (m.ended) {
+      beginCountdown();
+      if (!countdown && !navigationPending && (context || metadataError || !preferences.enabled || !preferences.autoplay)) command("releaseEnd");
+    }
     if (preferences.enabled && m.ready && !m.paused && !m.seeking) {
       playBlocked = false;
       const active = activeNow();
@@ -194,7 +206,10 @@
   browser.storage.onChanged.addListener((changes, area) => {
     if (area !== "local" || !changes.settings) return;
     preferences = A.settings(changes.settings.newValue);
-    if (!preferences.enabled || !preferences.autoplay) { stopCountdown(); countdownCancelled = true; }
+    if (!preferences.enabled || !preferences.autoplay) {
+      if (countdown) command("releaseEnd");
+      stopCountdown(); countdownCancelled = true;
+    }
     render(); void updateTimes();
   });
   async function refresh() {
